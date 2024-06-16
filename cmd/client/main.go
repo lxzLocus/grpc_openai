@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	protocolspb "openai/pkg/grpc"
+	pb "openai/pkg/grpc"
 	"os"
 
 	"google.golang.org/grpc"
@@ -14,7 +14,7 @@ import (
 
 var (
 	scanner *bufio.Scanner
-	client  protocolspb.GreetingServiceClient
+	client  pb.OpenAIServiceClient
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 	defer conn.Close()
 
 	// 3. gRPCクライアントを生成
-	client = hellopb.NewGreetingServiceClient(conn)
+	client = pb.NewOpenAIServiceClient(conn)
 
 	for {
 		fmt.Println("1: send Request")
@@ -60,15 +60,15 @@ func main() {
 M:
 }
 
-func Hello() {
+func api_convert() {
 	fmt.Println("Please enter your name.")
 	scanner.Scan()
 	name := scanner.Text()
 
-	req := &hellopb.HelloRequest{
+	req := &pb.ChatCompletionRequest{
 		Name: name,
 	}
-	res, err := client.Hello(context.Background(), req)
+	res, err := client.api_convert(context.Background(), req)
 	if err != nil {
 		fmt.Println(err)
 	} else {
