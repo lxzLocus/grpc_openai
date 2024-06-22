@@ -5,8 +5,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	pb "openai/pkg/grpc"
 	"os"
+
+	pb "openai/pkg/grpc"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -27,7 +28,6 @@ func main() {
 	address := "localhost:8080"
 	conn, err := grpc.Dial(
 		address,
-
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 	)
@@ -50,28 +50,60 @@ func main() {
 
 		switch in {
 		case "1":
-			Hello()
-
+			apiConvert()
 		case "2":
 			fmt.Println("bye.")
-			goto M
+			return
 		}
 	}
-M:
 }
 
-func api_convert() {
-	fmt.Println("Please enter your name.")
+func apiConvert() {
+	fmt.Println("Please enter prompt.")
 	scanner.Scan()
-	name := scanner.Text()
+	prompt := scanner.Text()
 
 	req := &pb.ChatCompletionRequest{
-		Name: name,
+		Prompt:                   prompt,
+		MaxTokens:                4096,
+		Temperature:              0.7,
+		TemperatureLast:          false,
+		DynamicTemperature:       false,
+		DynatempLow:              1,
+		DynatempHigh:             1,
+		DynatempExponent:         1,
+		SmoothingFactor:          0,
+		TopP:                     0.9,
+		MinP:                     0,
+		TopK:                     20,
+		RepetitionPenalty:        1.15,
+		PresencePenalty:          0,
+		FrequencyPenalty:         0,
+		RepetitionPenaltyRange:   1024,
+		TypicalP:                 1,
+		Tfs:                      1,
+		TopA:                     1,
+		EpsilonCutoff:            0,
+		EtaCutoff:                0,
+		GuidanceScale:            1,
+		PenaltyAlpha:             0,
+		MirostatMode:             0,
+		MirostatTau:              5,
+		MirostatEta:              0.1,
+		DoSample:                 true,
+		Seed:                     -1,
+		EncoderRepetitionPenalty: 1,
+		NoRepeatNgramSize:        0,
+		MinLength:                0,
+		NumBeams:                 1,
+		LengthPenalty:            1,
+		EarlyStopping:            false,
 	}
-	res, err := client.api_convert(context.Background(), req)
+
+	res, err := client.ApiConvert(context.Background(), req)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error calling ApiConvert:", err)
 	} else {
-		fmt.Println(res.GetMessage())
+		fmt.Println("Response from ApiConvert:", res.GetMessage())
 	}
 }
