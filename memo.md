@@ -59,3 +59,25 @@ ERROR:
   Code: Unknown
   Message: failed to send HTTP request: Post "http://192.168.10.30:5000/v1/completions": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
 ```
+---
+# キタコレ
+```
+% grpcurl -plaintext -d '{"prompt": "create simple python sample code"}' localhost:8080 openai.OpenAIService/CreateChatCompletion
+
+{
+  "id": "conv-1719094661403766016",
+  "choices": [
+    {
+      "text": " to call a function\n\nHere's a very basic example of how you can define and then call a Python function:\n\n```python\n# Defining the function\ndef greet():\n    print(\"Hello, World!\")\n\n# Calling the function\ngreet()\n```\nIn this example, we first defined a function called `greet`. This function does not take any arguments and simply prints \"Hello, World!\" when it is called. After defining the function, we called it using its name followed by parentheses."
+    }
+  ],
+  "created": "1719094661",
+  "model": "Codestral-22B-v0.1",
+  "object": "text_completion",
+  "usage": {
+    "promptTokens": 6,
+    "completionTokens": 118,
+    "totalTokens": 124
+  }
+}
+```
