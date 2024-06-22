@@ -132,17 +132,17 @@ func (s *myServer) ApiConvert(ctx context.Context, req *pb.ChatCompletionRequest
 	}
 
 	// HTTPリクエストの作成
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	httpReq, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Content-Type", "application/json")
 
 	// HTTPクライアントを作成
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	// HTTPリクエストを送信
-	resp, err := client.Do(req)
+	resp, err := client.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send HTTP request: %v", err)
 	}
