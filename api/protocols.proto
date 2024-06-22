@@ -8,8 +8,7 @@ service OpenAIService {
   rpc CreateChatCompletion (ChatCompletionRequest) returns (ChatCompletionResponse);
 }
 
-
-//リクエストメッセージの定義
+// リクエストメッセージの定義
 message ChatCompletionRequest {
   string model = 1;
   string prompt = 2;
@@ -69,9 +68,8 @@ message ChatCompletionRequest {
   string grammar_string = 56;
 }
 
-
-//レスポンスメッセージの定義
-message ChatCompletionResponse{
+// レスポンスメッセージの定義
+message ChatCompletionResponse {
   string id = 1;
   repeated Choice choices = 2;
   int64 created = 3;
@@ -82,12 +80,14 @@ message ChatCompletionResponse{
 
 // Choiceメッセージの定義
 message Choice {
-  // 必要なフィールドを追加
+  string text = 1; // 応答メッセージを持つフィールド
 }
 
 // Usageメッセージの定義
 message Usage {
-  // 必要なフィールドを追加
+  int32 prompt_tokens = 1;
+  int32 completion_tokens = 2;
+  int32 total_tokens = 3;
 }
 
 // エラーレスポンスの定義

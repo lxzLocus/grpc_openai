@@ -50,7 +50,7 @@ func main() {
 
 		switch in {
 		case "1":
-			apiConvert()
+			callApi()
 		case "2":
 			fmt.Println("bye.")
 			return
@@ -58,7 +58,7 @@ func main() {
 	}
 }
 
-func apiConvert() {
+func callApi() {
 	fmt.Println("Please enter prompt.")
 	scanner.Scan()
 	prompt := scanner.Text()
@@ -100,10 +100,12 @@ func apiConvert() {
 		EarlyStopping:            false,
 	}
 
-	res, err := client.ApiConvert(context.Background(), req)
+	res, err := client.CreateChatCompletion(context.Background(), req)
 	if err != nil {
 		fmt.Println("Error calling ApiConvert:", err)
 	} else {
-		fmt.Println("Response from ApiConvert:", res.GetMessage())
+		for _, choice := range res.GetChoices() {
+			fmt.Println("Response from CreateChatCompletion:", choice.GetText())
+		}
 	}
 }
