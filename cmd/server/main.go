@@ -59,8 +59,17 @@ type myServer struct {
 	pb.UnimplementedOpenAIServiceServer
 }
 
+type APIError struct {
+	Code int
+	Msg  string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("API error: code = %d, msg = %s", e.Code, e.Msg)
+}
+
 // api_convertにてREST APIと通信をする
-func (s *myServer) ApiConvert(ctx context.Context, req *pb.ChatCompletionRequest) (*pb.ChatCompletionResponse, error) {
+func (s *myServer) CreateChatCompletion(ctx context.Context, req *pb.ChatCompletionRequest) (*pb.ChatCompletionResponse, error) {
 	// REST APIのエンドポイント
 	const endpoint = "/v1/completions"
 	const url = "http://192.168.10.30:5000" + endpoint
@@ -168,6 +177,7 @@ func (s *myServer) ApiConvert(ctx context.Context, req *pb.ChatCompletionRequest
 		if err := json.Unmarshal(body, &apiError); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal error response body: %v", err)
 		}
-		return nil, fmt.Errorf("API error: %v", apiError)
+		return nil, &APIError{Code: resp.StatusCode, Msg: apiError.String()} // カスタムエラー型を使用
 	}
+
 }
