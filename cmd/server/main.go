@@ -120,8 +120,8 @@ func (s *myServer) CreateChatCompletion(ctx context.Context, req *pb.ChatComplet
 	}
 
 	// デバッグ用にリクエスト内容を出力
-	log.Println("HTTP Request Payload:")
-	log.Println(string(payload))
+	//log.Println("HTTP Request Payload:")
+	//log.Println(string(payload))
 
 	// HTTPリクエストの作成
 	httpReq, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
