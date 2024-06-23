@@ -77,7 +77,7 @@ func (s *myServer) CreateChatCompletion(ctx context.Context, req *pb.ChatComplet
 	// リクエストペイロードの作成
 	promptPayload := map[string]interface{}{
 		"prompt":                     req.Prompt,
-		"max_tokens":                 1024,
+		"max_tokens":                 512,
 		"temperature":                0.7,
 		"temperature_last":           false,
 		"dynamic_temperature":        false,
@@ -119,6 +119,10 @@ func (s *myServer) CreateChatCompletion(ctx context.Context, req *pb.ChatComplet
 		return nil, fmt.Errorf("failed to marshal request payload: %v", err)
 	}
 
+	// デバッグ用にリクエスト内容を出力
+	log.Println("HTTP Request Payload:")
+	log.Println(string(payload))
+
 	// HTTPリクエストの作成
 	httpReq, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
@@ -127,7 +131,7 @@ func (s *myServer) CreateChatCompletion(ctx context.Context, req *pb.ChatComplet
 	httpReq.Header.Set("Content-Type", "application/json")
 
 	// HTTPクライアントを作成
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 20 * time.Second}
 
 	// HTTPリクエストを送信
 	resp, err := client.Do(httpReq)

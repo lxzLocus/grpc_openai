@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	pb "openai/pkg/grpc"
 
@@ -50,29 +51,35 @@ func main() {
 
 		switch in {
 		case "1":
-			callApi()
+			/*関数呼び出し*/
+			apiConvert()
 		case "2":
 			fmt.Println("bye.")
-			return
+			goto M
 		}
 	}
+M:
 }
 
-func callApi() {
+func apiConvert() {
 	fmt.Println("Please enter prompt.")
 	scanner.Scan()
 	prompt := scanner.Text()
+
+	// タイムアウト時間を10秒に設定する例
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	req := &pb.ChatCompletionRequest{
 		Prompt: prompt,
 	}
 
-	res, err := client.CreateChatCompletion(context.Background(), req)
+	res, err := client.CreateChatCompletion(ctx, req)
 	if err != nil {
-		fmt.Println("Error calling ApiConvert:", err)
+		fmt.Println(err)
 	} else {
-		for _, choice := range res.GetChoices() {
-			fmt.Println("Response from CreateChatCompletion:", choice.GetText())
+		for _, choice := range res.Choices {
+			fmt.Println(choice.Text) // Assuming 'Text' is the field you want to print
 		}
 	}
 }
