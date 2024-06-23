@@ -5,8 +5,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	pb "openai/pkg/grpc"
 	"os"
+	"time"
+
+	pb "openai/pkg/grpc"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -27,7 +29,6 @@ func main() {
 	address := "localhost:8080"
 	conn, err := grpc.Dial(
 		address,
-
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 	)
@@ -50,8 +51,8 @@ func main() {
 
 		switch in {
 		case "1":
-			Hello()
-
+			/*関数呼び出し*/
+			apiConvert()
 		case "2":
 			fmt.Println("bye.")
 			goto M
@@ -60,18 +61,25 @@ func main() {
 M:
 }
 
-func api_convert() {
-	fmt.Println("Please enter your name.")
+func apiConvert() {
+	fmt.Println("Please enter prompt.")
 	scanner.Scan()
-	name := scanner.Text()
+	prompt := scanner.Text()
+
+	// タイムアウト時間を10秒に設定する例
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	req := &pb.ChatCompletionRequest{
-		Name: name,
+		Prompt: prompt,
 	}
-	res, err := client.api_convert(context.Background(), req)
+
+	res, err := client.CreateChatCompletion(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(res.GetMessage())
+		for _, choice := range res.Choices {
+			fmt.Println(choice.Text) // Assuming 'Text' is the field you want to print
+		}
 	}
 }

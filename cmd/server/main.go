@@ -59,90 +59,82 @@ type myServer struct {
 	pb.UnimplementedOpenAIServiceServer
 }
 
+type APIError struct {
+	Code int
+	Msg  string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("API error: code = %d, msg = %s", e.Code, e.Msg)
+}
+
 // api_convertにてREST APIと通信をする
-func (s *myServer) ApiConvert(ctx context.Context, req *pb.ChatCompletionRequest) (*pb.ChatCompletionResponse, error) {
+func (s *myServer) CreateChatCompletion(ctx context.Context, req *pb.ChatCompletionRequest) (*pb.ChatCompletionResponse, error) {
 	// REST APIのエンドポイント
 	const endpoint = "/v1/completions"
 	const url = "http://192.168.10.30:5000" + endpoint
 
 	// リクエストペイロードの作成
-	payload := map[string]interface{}{
-		"model":                      req.Model,
+	promptPayload := map[string]interface{}{
 		"prompt":                     req.Prompt,
-		"best_of":                    req.BestOf,
-		"echo":                       req.Echo,
-		"frequency_penalty":          req.FrequencyPenalty,
-		"logit_bias":                 req.LogitBias,
-		"logprobs":                   req.Logprobs,
-		"max_tokens":                 req.MaxTokens,
-		"n":                          req.N,
-		"presence_penalty":           req.PresencePenalty,
-		"stop":                       req.Stop,
-		"stream":                     req.Stream,
-		"suffix":                     req.Suffix,
-		"temperature":                req.Temperature,
-		"top_p":                      req.TopP,
-		"user":                       req.User,
-		"preset":                     req.Preset,
-		"min_p":                      req.MinP,
-		"dynamic_temperature":        req.DynamicTemperature,
-		"dynatemp_low":               req.DynatempLow,
-		"dynatemp_high":              req.DynatempHigh,
-		"dynatemp_exponent":          req.DynatempExponent,
-		"smoothing_factor":           req.SmoothingFactor,
-		"top_k":                      req.TopK,
-		"repetition_penalty":         req.RepetitionPenalty,
-		"repetition_penalty_range":   req.RepetitionPenaltyRange,
-		"typical_p":                  req.TypicalP,
-		"tfs":                        req.Tfs,
-		"top_a":                      req.TopA,
-		"epsilon_cutoff":             req.EpsilonCutoff,
-		"eta_cutoff":                 req.EtaCutoff,
-		"guidance_scale":             req.GuidanceScale,
-		"negative_prompt":            req.NegativePrompt,
-		"penalty_alpha":              req.PenaltyAlpha,
-		"mirostat_mode":              req.MirostatMode,
-		"mirostat_tau":               req.MirostatTau,
-		"mirostat_eta":               req.MirostatEta,
-		"temperature_last":           req.TemperatureLast,
-		"do_sample":                  req.DoSample,
-		"seed":                       req.Seed,
-		"encoder_repetition_penalty": req.EncoderRepetitionPenalty,
-		"no_repeat_ngram_size":       req.NoRepeatNgramSize,
-		"min_length":                 req.MinLength,
-		"num_beams":                  req.NumBeams,
-		"length_penalty":             req.LengthPenalty,
-		"early_stopping":             req.EarlyStopping,
-		"truncation_length":          req.TruncationLength,
-		"max_tokens_second":          req.MaxTokensSecond,
-		"prompt_lookup_num_tokens":   req.PromptLookupNumTokens,
-		"custom_token_bans":          req.CustomTokenBans,
-		"sampler_priority":           req.SamplerPriority,
-		"auto_max_new_tokens":        req.AutoMaxNewTokens,
-		"ban_eos_token":              req.BanEosToken,
-		"add_bos_token":              req.AddBosToken,
-		"skip_special_tokens":        req.SkipSpecialTokens,
-		"grammar_string":             req.GrammarString,
+		"max_tokens":                 512,
+		"temperature":                0.7,
+		"temperature_last":           false,
+		"dynamic_temperature":        false,
+		"dynatemp_low":               1,
+		"dynatemp_high":              1,
+		"dynatemp_exponent":          1,
+		"smoothing_factor":           0,
+		"top_p":                      0.9,
+		"min_p":                      0,
+		"top_k":                      20,
+		"repetition_penalty":         1.15,
+		"presence_penalty":           0,
+		"frequency_penalty":          0,
+		"repetition_penalty_range":   1024,
+		"typical_p":                  1,
+		"tfs":                        1,
+		"top_a":                      0,
+		"epsilon_cutoff":             0,
+		"eta_cutoff":                 0,
+		"guidance_scale":             1,
+		"penalty_alpha":              0,
+		"mirostat_mode":              0,
+		"mirostat_tau":               5,
+		"mirostat_eta":               0.1,
+		"do_sample":                  true,
+		"seed":                       -1,
+		"encoder_repetition_penalty": 1,
+		"no_repeat_ngram_size":       0,
+		"min_length":                 0,
+		"num_beams":                  1,
+		"length_penalty":             1,
+		"early_stopping":             false,
+		"sampler_priority":           "temperature\ndynamic_temperature\nquadratic_sampling\ntop_k\ntop_p\ntypical_p\nepsilon_cutoff\neta_cutoff\ntfs\ntop_a\nmin_p\nmirostat",
 	}
 
 	// ペイロードをJSONに変換
-	jsonPayload, err := json.Marshal(payload)
+	payload, err := json.Marshal(promptPayload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request payload: %v", err)
 	}
 
+	// デバッグ用にリクエスト内容を出力
+	//log.Println("HTTP Request Payload:")
+	//log.Println(string(payload))
+
 	// HTTPリクエストの作成
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	httpReq, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Content-Type", "application/json")
 
 	// HTTPクライアントを作成
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 20 * time.Second}
 
 	// HTTPリクエストを送信
-	resp, err := client.Do(req)
+	resp, err := client.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send HTTP request: %v", err)
 	}
@@ -168,6 +160,7 @@ func (s *myServer) ApiConvert(ctx context.Context, req *pb.ChatCompletionRequest
 		if err := json.Unmarshal(body, &apiError); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal error response body: %v", err)
 		}
-		return nil, fmt.Errorf("API error: %v", apiError)
+		return nil, &APIError{Code: resp.StatusCode, Msg: apiError.String()} // カスタムエラー型を使用
 	}
+
 }

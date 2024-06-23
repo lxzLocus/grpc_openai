@@ -8,70 +8,13 @@ service OpenAIService {
   rpc CreateChatCompletion (ChatCompletionRequest) returns (ChatCompletionResponse);
 }
 
-
-//リクエストメッセージの定義
+// リクエストメッセージの定義
 message ChatCompletionRequest {
-  string model = 1;
-  string prompt = 2;
-  int32 best_of = 3;
-  bool echo = 4;
-  double frequency_penalty = 5;
-  map<string, double> logit_bias = 6;
-  int32 logprobs = 7;
-  int32 max_tokens = 8;
-  int32 n = 9;
-  double presence_penalty = 10;
-  repeated string stop = 11;
-  bool stream = 12;
-  string suffix = 13;
-  double temperature = 14;
-  double top_p = 15;
-  string user = 16;
-  string preset = 17;
-  double min_p = 18;
-  bool dynamic_temperature = 19;
-  double dynatemp_low = 20;
-  double dynatemp_high = 21;
-  double dynatemp_exponent = 22;
-  double smoothing_factor = 23;
-  int32 top_k = 24;
-  double repetition_penalty = 25;
-  int32 repetition_penalty_range = 26;
-  double typical_p = 27;
-  double tfs = 28;
-  double top_a = 29;
-  double epsilon_cutoff = 30;
-  double eta_cutoff = 31;
-  double guidance_scale = 32;
-  string negative_prompt = 33;
-  double penalty_alpha = 34;
-  int32 mirostat_mode = 35;
-  double mirostat_tau = 36;
-  double mirostat_eta = 37;
-  bool temperature_last = 38;
-  bool do_sample = 39;
-  int32 seed = 40;
-  double encoder_repetition_penalty = 41;
-  int32 no_repeat_ngram_size = 42;
-  int32 min_length = 43;
-  int32 num_beams = 44;
-  double length_penalty = 45;
-  bool early_stopping = 46;
-  int32 truncation_length = 47;
-  int32 max_tokens_second = 48;
-  int32 prompt_lookup_num_tokens = 49;
-  string custom_token_bans = 50;
-  repeated string sampler_priority = 51;
-  bool auto_max_new_tokens = 52;
-  bool ban_eos_token = 53;
-  bool add_bos_token = 54;
-  bool skip_special_tokens = 55;
-  string grammar_string = 56;
+  string prompt = 1;
 }
 
-
-//レスポンスメッセージの定義
-message ChatCompletionResponse{
+// レスポンスメッセージの定義
+message ChatCompletionResponse {
   string id = 1;
   repeated Choice choices = 2;
   int64 created = 3;
@@ -82,12 +25,14 @@ message ChatCompletionResponse{
 
 // Choiceメッセージの定義
 message Choice {
-  // 必要なフィールドを追加
+  string text = 1; // 応答メッセージを持つフィールド
 }
 
 // Usageメッセージの定義
 message Usage {
-  // 必要なフィールドを追加
+  int32 prompt_tokens = 1;
+  int32 completion_tokens = 2;
+  int32 total_tokens = 3;
 }
 
 // エラーレスポンスの定義
